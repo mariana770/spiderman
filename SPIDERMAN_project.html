@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spider-Man's Complete Verb Challenge</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f8ff;
+        }
+        .spiderman-img {
+            width: 120px;
+            float: left;
+            margin: 0 20px 20px 0;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+            shape-outside: circle(50%);
+        }
+        .verb {
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .verb:hover {
+            background: #fff3cd;
+        }
+        .regular { background: #ffebee; color: #d32f2f; }
+        .irregular { background: #e3f2fd; color: #1976d2; }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            box-shadow: 3px 3px 6px #d1d1d1, -3px -3px 6px #ffffff;
+        }
+        #colorIndicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        #progressBar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        #progress {
+            height: 100%;
+            width: 0%;
+            background: #4CAF50;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .verbs-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .base-verbs, .past-verbs {
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 150px;
+        }
+        .draggable {
+            cursor: grab;
+            padding: 10px;
+            margin: 8px;
+            background: #fff3cd;
+            border-radius: 4px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .dropzone {
+            padding: 10px;
+            margin: 8px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .matched {
+            background: #c8e6c9 !important;
+        }
+        #timer {
+            font-size: 24px;
+            color: #d32f2f;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+        #scoreBoard {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .score-box {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: #e3f2fd;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <img src="https://upload.wikimedia.org/wikipedia/en/2/21/Web_of_Spider-Man_Vol_1_129-1.png" 
+         class="spiderman-img" 
+         alt="Spider-Man">
+
+    <div id="timer">⏳ 04:00</div>
+    
+    <h1>🔍 Spider-Man's Ultimate Verb Challenge!</h1>
+    
+    <div id="scoreBoard">
+        <div class="score-box">Verb Score: <span id="verbScore">0</span>/15</div>
+        <div class="score-box">Match Score: <span id="matchScore">0</span>/8</div>
+    </div>
+
+    <div class="controls">
+        <button onclick="selectColor('regular')" style="color: #d32f2f">Regular Verbs</button>
+        <button onclick="selectColor('irregular')" style="color: #1976d2">Irregular Verbs</button>
+        <div id="colorIndicator"></div>
+    </div>
+
+    <div id="progressBar">
+        <div id="progress"></div>
+    </div>
+
+    <div id="text">
+        <p>"Last night, I <span class="verb">saved</span> a cat from a tree and 
+        <span class="verb">went</span> to Joe’s Pizza. I <span class="verb">bought</span> a soda, 
+        <span class="verb">ate</span> two slices, and <span class="verb">called</span> Aunt May to let her know I <span class="verb">was</span> safe.
+        Later, I <span class="verb">caught</span> two burglars sneaking around the mansion. I 
+        <span class="verb">stopped</span> them quickly and <span class="verb">had</span> to handcuff them myself — no big deal.
+        Around midnight, I <span class="verb">woke</span> up, <span class="verb">looked</span> 
+        at the stars, and <span class="verb">stayed</span> far away from the treasure. I fight crime… not ghosts.
+        Before dawn, I <span class="verb">swung</span> across the city, <span class="verb">fought</span> a villain near the bridge, and <span class="verb">disappeared</span> into the shadows before the police arrived."</p>
+    </div>
+
+    <h3>🕸️ Match the Irregular Verbs!</h3>
+    <div class="verbs-container">
+        <div class="base-verbs">
+            <div class="dropzone" data-base="be">be</div>
+            <div class="dropzone" data-base="go">go</div>
+            <div class="dropzone" data-base="buy">buy</div>
+            <div class="dropzone" data-base="eat">eat</div>
+            <div class="dropzone" data-base="catch">catch</div>
+            <div class="dropzone" data-base="have">have</div>
+            <div class="dropzone" data-base="wake">wake</div>
+            <div class="dropzone" data-base="swing">swing</div>
+            <div class="dropzone" data-base="fight">fight</div>
+        </div>
+        
+        <div class="past-verbs" id="shuffledVerbs"></div>
+    </div>
+
+    <button onclick="checkAnswers()" style="margin-top: 20px; background: #4CAF50; color: white;">Check Answers!</button>
+    <button onclick="startTimer()" style="background: #1976d2; color: white;">Start Timer (4:00)</button>
+    <button onclick="resetAll()" style="margin-left: 10px;">Reset Game</button>
+
+    <script>
+        // Game State
+        let selectedColor = null;
+        let timeLeft = 240;
+        let timerId = null;
+        const totalVerbs = document.querySelectorAll('.verb').length;
+        let verbScore = 0;
+        let matchScore = 0;
+
+        // Verb Data
+        const solutions = {
+            'saved': 'regular', 'went': 'irregular', 'bought': 'irregular',
+            'ate': 'irregular', 'called': 'regular', 'caught': 'irregular',
+            'stopped': 'regular', 'woke': 'irregular', 'looked': 'regular',
+            'stayed': 'regular', 'swung': 'irregular', 'fought': 'irregular',
+            'disappeared': 'regular', 'was': 'irregular', 'had': 'irregular'
+        };
+
+        const verbMatches = {
+            'be': 'was', 'go': 'went', 'buy': 'bought',
+            'eat': 'ate', 'catch': 'caught', 'have': 'had',
+            'wake': 'woke', 'swing': 'swung', 'fight': 'fought'
+        };
+
+        // Drag & Drop System
+        function shuffleVerbs() {
+            const pastVerbs = Object.values(verbMatches);
+            const shuffled = [...pastVerbs].sort(() => Math.random() - 0.5);
+            
+            const container = document.getElementById('shuffledVerbs');
+            container.innerHTML = shuffled.map(verb => `
+                <div class="draggable" draggable="true" data-past="${verb}">
+                    ${verb}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.draggable').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.past);
+        }
+
+        document.querySelectorAll('.dropzone').forEach(zone => {
+            zone.addEventListener('dragover', e => e.preventDefault());
+            
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                const past = e.dataTransfer.getData('text/plain');
+                const base = e.target.dataset.base;
+                
+                if(verbMatches[base] === past) {
+                    e.target.innerHTML = `${base} → ${past}`;
+                    e.target.classList.add('matched');
+                    matchScore++;
+                    document.getElementById('matchScore').textContent = matchScore;
+                } else {
+                    e.target.classList.add('incorrect');
+                    setTimeout(() => e.target.classList.remove('incorrect'), 1000);
+                }
+            });
+        });
+
+        // Timer System
+        function startTimer() {
+            if(timerId) return;
+            timerId = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = `⏳ ${Math.floor(timeLeft/60).toString().padStart(2,'0')}:${(timeLeft%60).toString().padStart(2,'0')}`;
+                
+                if(timeLeft <= 0) {
+                    clearInterval(timerId);
+                    checkAnswers();
+                    alert("Time's up! Let's check your answers!");
+                }
+            }, 1000);
+        }
+
+        // Main Game Functions
+        function selectColor(type) {
+            selectedColor = type;
+            document.getElementById('colorIndicator').style.background = 
+                type === 'regular' ? '#d32f2f' : '#1976d2';
+        }
+
+        document.querySelectorAll('.verb').forEach(verb => {
+            verb.addEventListener('click', () => {
+                if (!selectedColor) {
+                    alert('Please select a color first!');
+                    return;
+                }
+                
+                verb.className = 'verb ' + selectedColor;
+                verbScore = document.querySelectorAll('.verb[class*="regular"], .verb[class*="irregular"]').length;
+                document.getElementById('verbScore').textContent = verbScore;
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const progress = (verbScore / totalVerbs) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            if (verbScore === totalVerbs) document.getElementById('progress').classList.add('completed');
+        }
+
+        function checkAnswers() {
+            // Verify verb colors
+            document.querySelectorAll('.verb').forEach(verb => {
+                const correct = solutions[verb.textContent.trim()] === verb.className.replace('verb ', '');
+                verb.style.border = correct ? '2px solid #4CAF50' : '2px solid #ff5722';
+            });
+
+            // Calculate final score
+            const totalScore = verbScore + (matchScore * 2);
+            alert(`Game Over!\nVerb Score: ${verbScore}/15\nMatch Score: ${matchScore}/8\nTotal: ${totalScore} points!`);
+        }
+
+        function resetAll() {
+            // Reset verbs
+            document.querySelectorAll('.verb').forEach(verb => {
+                verb.className = 'verb';
+                verb.style.border = '';
+            });
+            
+            // Reset matching game
+            document.querySelectorAll('.dropzone').forEach(zone => {
+                zone.innerHTML = zone.dataset.base;
+                zone.classList.remove('matched', 'incorrect');
+            });
+            
+            // Reset scores and timer
+            verbScore = 0;
+            matchScore = 0;
+            timeLeft = 240;
+            clearInterval(timerId);
+            timerId = null;
+            document.getElementById('verbScore').textContent = '0';
+            document.getElementById('matchScore').textContent = '0';
+            document.getElementById('timer').textContent = '⏳ 04:00';
+            document.getElementById('colorIndicator').style.background = '';
+            document.getElementById('progress').style.width = '0%';
+            document.getElementById('progress').classList.remove('completed');
+            shuffleVerbs();
+        }
+
+        // Initialize game
+        shuffleVerbs();
+    </script>
+</body>
+</html>
